@@ -1,87 +1,176 @@
-import React from 'react'
-import {useEffect,useState} from 'react'
-import Box from '@mui/material/Box';
+import React, { useEffect, useState } from "react";
+import Box from "@mui/material/Box";
 import { IoMdArrowBack } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
-import { Link } from 'react-router-dom';
-import { fetchHistoryApi,deleteHistoryApi} from '../services/allApis';
-
-
+import { Link } from "react-router-dom";
+import { fetchHistoryApi, deleteHistoryApi } from "../services/allApis";
 
 function History() {
-  const [historyData,setHistoryData]=useState([])
-  const [deleteStatus,setDeleteStatus]=useState([])
-
+  const [historyData, setHistoryData] = useState([]);
+  const [deleteStatus, setDeleteStatus] = useState("");
 
   useEffect(() => {
-    getData()
-  },[deleteStatus])
+    getData();
+  }, [deleteStatus]);
 
-  const getData = async() => {
-    try{
-      const res = await fetchHistoryApi()
-      console.log(res)
-      setHistoryData(res.data)
+  const getData = async () => {
+    try {
+      const res = await fetchHistoryApi();
+      setHistoryData(res.data);
+    } catch (err) {
+      console.log(err);
     }
-    catch(err){
-      console.log(err)
-    }
-  }
+  };
 
-  const handleDeleteData=async(id)=>{
-    try{
-      const res=await deleteHistoryApi(id)
-      console.log(res)
-      setDeleteStatus(res.id)
+  const handleDeleteData = async (id) => {
+    try {
+      await deleteHistoryApi(id);
+      setDeleteStatus(id);
+    } catch (err) {
+      console.log(err);
     }
-    catch(err){
-      console.log(err)
-    }
-  }
+  };
+
   return (
     <>
-    <div className='container-fluid p-2'>
-
-      <div className='container-fluid my-3 d-flex justify-content-between '>
-        <h2>Resume Downloaded History</h2>
-        {/* Back to Instructions */}
-        <Link className='btn' to={'/instructions'}><IoMdArrowBack style={{fontSize:'28px'}} />Back</Link>
-      </div>
-
-      <div className='row container-fluid'>
-        <div className='col-md-4 d-flex justify-content-evenly gap-3'>
-        {
-          historyData.length > 0 ?
-          <>
-          {
-            historyData.map(item => (
-              <Box component="section" className='mt-5 border shadow' sx={{ p: 3}}>
-                <div className='d-flex justify-content-evenly'>
-                  <h6 className='text-center'>
-                  Review at: <br/>
-                  {item?.timestamp}
-                  </h6>
-                  <button className='btn'>
-                    <MdDelete className='text-danger' onClick={()=>{handleDeleteData(item.id)}} style={{fontSize:'30px'}} />
-                  </button>
-                </div>
-                <div className='w-100'>
-                  <img src={item?.imgUrl} width={'100%'} height={'80rem'} alt="" />
-                </div>
-              </Box>
-
-            ))
-          }
-          </>
-          :
-          <h2 className='text-center text-danger my-4'>No History!</h2>
+      <style>
+        {`
+        .history-page{
+          min-height:100vh;
+          background:#020617;
+          color:white;
         }
 
+        .history-title{
+          color:#60a5fa;
+          font-weight:700;
+        }
+
+        .back-btn{
+          color:white;
+          border:1px solid #3b82f6;
+          border-radius:10px;
+          padding:8px 18px;
+          text-decoration:none;
+          transition:.3s;
+        }
+
+        .back-btn:hover{
+          background:#3b82f6;
+          color:white;
+        }
+
+        .history-card{
+          background:#0f172a;
+          border:1px solid rgba(255,255,255,0.08);
+          border-radius:18px;
+          overflow:hidden;
+          transition:.3s;
+        }
+
+        .history-card:hover{
+          transform:translateY(-6px);
+          box-shadow:0 10px 30px rgba(59,130,246,.25);
+        }
+
+        .history-image{
+          width:100%;
+          height:320px;
+          object-fit:cover;
+        }
+
+        .delete-btn{
+          background:none;
+          border:none;
+          color:#ef4444;
+          font-size:28px;
+          transition:.3s;
+        }
+
+        .delete-btn:hover{
+          transform:scale(1.15);
+        }
+
+        .history-date{
+          color:#cbd5e1;
+          font-size:14px;
+        }
+
+        .empty-history{
+          min-height:60vh;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          color:#ef4444;
+        }
+        `}
+      </style>
+
+      <div className="container-fluid history-page p-4">
+
+        {/* Header */}
+        <div className="d-flex justify-content-between align-items-center mb-5">
+          <h2 className="history-title">
+            Resume Download History
+          </h2>
+
+          <Link className="back-btn" to={"/instructions"}>
+            <IoMdArrowBack className="me-2" />
+            Back
+          </Link>
         </div>
+
+        {/* History Cards */}
+        {historyData.length > 0 ? (
+          <div className="row g-4">
+            {historyData.map((item) => (
+              <div
+                className="col-sm-12 col-md-6 col-lg-4"
+                key={item.id}
+              >
+                <Box className="history-card shadow-lg">
+
+                  <img
+                    src={item?.imgUrl}
+                    alt="Resume"
+                    className="history-image"
+                  />
+
+                  <div className="p-3">
+                    <div className="d-flex justify-content-between align-items-center">
+
+                      <div>
+                        <h6 className="mb-1">
+                          Downloaded On
+                        </h6>
+
+                        <span className="history-date">
+                          {item?.timestamp}
+                        </span>
+                      </div>
+
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDeleteData(item.id)}
+                      >
+                        <MdDelete />
+                      </button>
+
+                    </div>
+                  </div>
+
+                </Box>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-history">
+            <h2>No Download History Found</h2>
+          </div>
+        )}
       </div>
-    </div>
     </>
-  )
+  );
 }
 
-export default History
+export default History;

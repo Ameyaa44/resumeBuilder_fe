@@ -30,6 +30,8 @@
 
 Server - json-server --watch db.json
 
-Sweet Alert
+Sweet Alert -
+Installation
+Import
 
 //navbg-#04267ef7
